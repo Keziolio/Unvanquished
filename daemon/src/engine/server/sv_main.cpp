@@ -34,6 +34,7 @@ Maryland 20850 USA.
 
 #include "server.h"
 
+#include "common/Defs.h"
 #include "framework/CommandSystem.h"
 
 serverStatic_t svs; // persistent server info
@@ -334,8 +335,8 @@ but not on every player enter or exit.
 ================
 */
 static const int HEARTBEAT_MSEC = (300 * 1000);
-#define HEARTBEAT_GAME "Unvanquished"
-#define HEARTBEAT_DEAD "Unvanquished-dead"
+#define HEARTBEAT_GAME PRODUCT_NAME
+#define HEARTBEAT_DEAD PRODUCT_NAME "-dead"
 
 void SV_MasterHeartbeat( const char *hbname )
 {
