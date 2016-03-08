@@ -14,6 +14,7 @@ set(SHAREDLIST_cgame
 )
 
 set(SHAREDLIST_sgame
+    ${MOUNT_DIR}/shared/server/sg_api.cpp
     PARENT_SCOPE
 )
 
