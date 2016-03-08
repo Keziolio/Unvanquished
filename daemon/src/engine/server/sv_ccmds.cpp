@@ -32,6 +32,7 @@ Maryland 20850 USA.
 ===========================================================================
 */
 
+#include <iomanip>
 #include "server.h"
 #include "framework/CvarSystem.h"
 
@@ -243,7 +244,7 @@ static void SV_Status_f()
 	// make sure server is running
 	if ( !com_sv_running->integer )
 	{
-		Log::Notice( "Server is not running.\n" );
+		Log::Notice( "Server is not running." );
 		return;
 	}
 
@@ -256,12 +257,11 @@ static void SV_Status_f()
 
 	avg = 1000 * svs.stats.latched_active / STATFRAMES;
 
-	Log::Notice( "cpu utilization  : %3i%%\n"
-	            "avg response time: %i ms\n"
-	            "map: %s\n"
-	            "num score ping name            lastmsg address               qport rate\n"
-	            "--- ----- ---- --------------- ------- --------------------- ----- -----\n",
-	           ( int ) cpu, ( int ) avg, sv_mapname->string );
+	Log::Notice("cpu utilization  : %3i%%", static_cast<int>(cpu));
+	Log::Notice("avg response time: %i ms", static_cast<int>(avg));
+	Log::Notice("map: %s", sv_mapname->string);
+	Log::Notice("num score ping name            lastmsg address               qport rate\n"
+	            "--- ----- ---- --------------- ------- --------------------- ----- -----");
 
 	for ( i = 0, cl = svs.clients; i < sv_maxclients->integer; i++, cl++ )
 	{
@@ -269,52 +269,53 @@ static void SV_Status_f()
 		{
 			continue;
 		}
+		std::ostringstream oss;
 
-		Log::Notice( "%3i ", i );
+		oss << std::setw(3) << i;
+		oss << " ";
+
 		ps = SV_GameClientNum( i );
-		Log::Notice( "%5i ", ps->persistant[ PERS_SCORE ] );
+		oss << std::setw(5) << ps->persistant[ PERS_SCORE ];
+		oss << " ";
 
 		if ( cl->state == clientState_t::CS_CONNECTED )
 		{
-			Log::Notice( "CNCT " );
+			oss << "CNCT";
 		}
 		else if ( cl->state == clientState_t::CS_ZOMBIE )
 		{
-			Log::Notice( "ZMBI " );
+			oss << "ZMBI";
 		}
 		else
 		{
 			ping = cl->ping < 9999 ? cl->ping : 9999;
-			Log::Notice( "%4i ", ping );
+			oss << std::setw(4) << ping;
 		}
+		oss << " ";
 
-		Log::Notice( "%s", cl->name );
-		l = 16 - strlen( cl->name );
-
-		for ( j = 0; j < l; j++ )
+		s = cl->name;
+		oss << s;
+		for ( j = 0, l = 16 - Color::StrlenNocolor(s); j < l; j++ )
 		{
-			Log::Notice( " " );
+			oss << " ";
 		}
 
-		Log::Notice( "%7i ", svs.time - cl->lastPacketTime );
+		oss << std::setw(7) << svs.time - cl->lastPacketTime << " ";
 
 		s = NET_AdrToString( cl->netchan.remoteAddress );
-		Log::Notice( "%s", s );
-		l = 22 - strlen( s );
-
-		for ( j = 0; j < l; j++ )
+		oss << s;
+		for ( j = 0, l = 22 - strlen( s ); j < l; j++ )
 		{
-			Log::Notice( " " );
+			oss << " ";
 		}
 
-		Log::Notice( "%5i", cl->netchan.qport );
-
-		Log::Notice( " %5i", cl->rate );
-
-		Log::Notice( "\n" );
+		oss << std::setw(5) << cl->netchan.qport;
+		oss << " ";
+		oss << std::setw(5) << cl->rate;
+		Log::Notice(oss.str());
 	}
 
-	Log::Notice( "\n" );
+	Log::Notice("");
 }
 
 /*
